@@ -1,4 +1,4 @@
-export default function Article() {
+export function Article() {
   return (
     <div className="article-page">
       <div className="banner">

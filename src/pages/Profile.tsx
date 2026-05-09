@@ -1,4 +1,4 @@
-export default function Profile() {
+export function Profile() {
   return (
     <div className="profile-page">
       <div className="user-info">

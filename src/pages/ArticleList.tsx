@@ -1,4 +1,4 @@
-export default function ArticleList() {
+export function ArticleList() {
   return (
     <div className="home-page">
       <div className="banner">

@@ -1,4 +1,4 @@
-export default function Editor() {
+export function Editor() {
   return (
     <div className="editor-page">
       <div className="container page">

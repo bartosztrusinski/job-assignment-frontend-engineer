@@ -1,4 +1,4 @@
-export default function LoginRegister() {
+export function LoginRegister() {
   return (
     <div className="auth-page">
       <div className="container page">
