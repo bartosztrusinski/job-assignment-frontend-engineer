@@ -1,20 +1,43 @@
-export function Profile() {
+import { useQuery } from "@tanstack/react-query";
+import { RouteComponentProps } from "react-router-dom";
+
+import type { Profile as ProfileType } from "types";
+import userImagePlaceholder from "assets/user-image-placeholder.png";
+
+export function Profile({ match }: RouteComponentProps<{ username: string }>) {
+  const { username } = match.params;
+  const { data, isLoading } = useQuery<{ profile: ProfileType }>({
+    queryKey: ["profile", username],
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile");
+      }
+      return response.json();
+    },
+  });
+
   return (
     <div className="profile-page">
       <div className="user-info">
         <div className="container">
           <div className="row">
             <div className="col-xs-12 col-md-10 offset-md-1">
-              <img src="http://i.imgur.com/Qr71crq.jpg" className="user-img" />
-              <h4>Eric Simons</h4>
-              <p>
-                Cofounder @GoThinkster, lived in Aol&lsquo;s HQ for a few months, kinda looks like Peeta from the Hunger
-                Games
-              </p>
-              <button className="btn btn-sm btn-outline-secondary action-btn">
-                <i className="ion-plus-round" />
-                &nbsp; Follow Eric Simons
-              </button>
+              {data ? (
+                <>
+                  <img src={data.profile.image || userImagePlaceholder} className="user-img" />
+                  <h4>{data.profile.username}</h4>
+                  <p>{data.profile.bio}</p>
+                  <button className="btn btn-sm btn-outline-secondary action-btn">
+                    <i className="ion-plus-round" />
+                    &nbsp; Follow {data.profile.username}
+                  </button>
+                </>
+              ) : isLoading ? (
+                <p>Loading profile...</p>
+              ) : (
+                <p>Could not load profile. Please try again.</p>
+              )}
             </div>
           </div>
         </div>
