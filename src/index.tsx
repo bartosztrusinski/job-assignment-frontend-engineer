@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import { App } from "App";
 import { reportWebVitals } from "./reportWebVitals";
+import { AuthProvider } from "./contexts/AuthContext";
 
 // TODO we would typically want to configure the query client
 const queryClient = new QueryClient();
@@ -12,7 +13,9 @@ const queryClient = new QueryClient();
 ReactDOM.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>,
