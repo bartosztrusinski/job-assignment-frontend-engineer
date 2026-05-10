@@ -84,7 +84,7 @@ export function ArticleList() {
                       <i className="ion-heart" /> {article.favoritesCount}
                     </button>
                   </div>
-                  <Link to={`${article.slug}`} className="preview-link">
+                  <Link to={`/${article.slug}`} className="preview-link">
                     <h1>{article.title}</h1>
                     <p>{article.description}</p>
                     <span>Read more...</span>
