@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { RouteComponentProps } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 
-import type { Profile as ProfileType } from "types";
+import type { Article, Profile as ProfileType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
+import { format } from "date-fns";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
-  const { data, isLoading } = useQuery<{ profile: ProfileType }>({
+  const { data: profileData, isLoading: isProfileLoading } = useQuery<{ profile: ProfileType }>({
     queryKey: ["profile", username],
     queryFn: async () => {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}`);
@@ -16,6 +17,19 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
       return response.json();
     },
   });
+  const { data: articlesData, isLoading: isArticlesLoading } = useQuery<{ articles: Article[] }>({
+    queryKey: ["articles", username],
+    keepPreviousData: true,
+    queryFn: async () => {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles?author=${username}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch articles");
+      }
+      return response.json();
+    },
+  });
+
+  const hasNoArticles = articlesData?.articles.length === 0;
 
   return (
     <div className="profile-page">
@@ -23,17 +37,17 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
         <div className="container">
           <div className="row">
             <div className="col-xs-12 col-md-10 offset-md-1">
-              {data ? (
+              {profileData ? (
                 <>
-                  <img src={data.profile.image || userImagePlaceholder} className="user-img" />
-                  <h4>{data.profile.username}</h4>
-                  <p>{data.profile.bio}</p>
+                  <img src={profileData.profile.image || userImagePlaceholder} className="user-img" />
+                  <h4>{profileData.profile.username}</h4>
+                  <p>{profileData.profile.bio}</p>
                   <button className="btn btn-sm btn-outline-secondary action-btn">
                     <i className="ion-plus-round" />
-                    &nbsp; Follow {data.profile.username}
+                    &nbsp; Follow {profileData.profile.username}
                   </button>
                 </>
-              ) : isLoading ? (
+              ) : isProfileLoading ? (
                 <p>Loading profile...</p>
               ) : (
                 <p>Could not load profile. Please try again.</p>
@@ -61,53 +75,37 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
               </ul>
             </div>
 
-            <div className="article-preview">
-              <div className="article-meta">
-                <a href="/#/profile/ericsimmons">
-                  <img src="http://i.imgur.com/Qr71crq.jpg" />
-                </a>
-                <div className="info">
-                  <a href="/#/profile/ericsimmons" className="author">
-                    Eric Simons
-                  </a>
-                  <span className="date">January 20th</span>
+            {hasNoArticles ? (
+              <div className="article-preview">No articles found.</div>
+            ) : articlesData ? (
+              articlesData.articles.map(article => (
+                <div key={article.slug} className="article-preview">
+                  <div className="article-meta">
+                    <Link to={`/profile/${article.author.username}`}>
+                      <img src={article.author.image || userImagePlaceholder} alt={article.author.username} />
+                    </Link>
+                    <div className="info">
+                      <Link to={`/profile/${article.author.username}`} className="author">
+                        {article.author.username}
+                      </Link>
+                      <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
+                    </div>
+                    <button className="btn btn-outline-primary btn-sm pull-xs-right">
+                      <i className="ion-heart" /> {article.favoritesCount}
+                    </button>
+                  </div>
+                  <Link to={`/${article.slug}`} className="preview-link">
+                    <h1>{article.title}</h1>
+                    <p>{article.description}</p>
+                    <span>Read more...</span>
+                  </Link>
                 </div>
-                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                  <i className="ion-heart" /> 29
-                </button>
-              </div>
-              <a href="/#/how-to-build-webapps-that-scale" className="preview-link">
-                <h1>How to build webapps that scale</h1>
-                <p>This is the description for the post.</p>
-                <span>Read more...</span>
-              </a>
-            </div>
-
-            <div className="article-preview">
-              <div className="article-meta">
-                <a href="/#/profile/albertpai">
-                  <img src="http://i.imgur.com/N4VcUeJ.jpg" />
-                </a>
-                <div className="info">
-                  <a href="/#/profile/albertpai" className="author">
-                    Albert Pai
-                  </a>
-                  <span className="date">January 20th</span>
-                </div>
-                <button className="btn btn-outline-primary btn-sm pull-xs-right">
-                  <i className="ion-heart" /> 32
-                </button>
-              </div>
-              <a href="/#/the-song-you-wont-ever-stop-singing" className="preview-link">
-                <h1>The song you won&lsquo;t ever stop singing. No matter how hard you try.</h1>
-                <p>This is the description for the post.</p>
-                <span>Read more...</span>
-                <ul className="tag-list">
-                  <li className="tag-default tag-pill tag-outline">Music</li>
-                  <li className="tag-default tag-pill tag-outline">Song</li>
-                </ul>
-              </a>
-            </div>
+              ))
+            ) : isArticlesLoading ? (
+              <div className="article-preview">Loading articles...</div>
+            ) : (
+              <div className="article-preview">Unable to load articles. Please try again.</div>
+            )}
           </div>
         </div>
       </div>
