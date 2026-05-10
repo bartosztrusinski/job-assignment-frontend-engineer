@@ -9,7 +9,7 @@ import userImagePlaceholder from "assets/user-image-placeholder.png";
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
   const { data, isLoading, isError } = useQuery<{ article: ArticleType }>({
-    queryKey: ["article"],
+    queryKey: ["article", slug],
     queryFn: async () => {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles/${slug}`);
       if (!response.ok) {
