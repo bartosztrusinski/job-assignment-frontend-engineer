@@ -4,6 +4,7 @@ import { format } from "date-fns";
 
 import type { Article } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
+import { useAuth } from "contexts/AuthContext";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
 const BASE_URL = `${process.env.REACT_APP_API_URL}/api/articles`;
@@ -20,18 +21,22 @@ function useSearchParam(param: string) {
 }
 
 export function ArticleList() {
+  const { currentUser } = useAuth();
   const tabParam = useSearchParam("tab");
   const activeTab = TABS.find(tab => tabParam === tab.value)?.value ?? DEFAULT_TAB;
-  // TODO handle user feed when user is logged in
-  const articlesUrl = activeTab === "feed" ? `${BASE_URL}` : BASE_URL;
+  const articlesUrl = activeTab === "feed" ? `${BASE_URL}/feed` : BASE_URL;
   const { data, isLoading } = useQuery<{ articles: Article[] }>({
     queryKey: ["articles", activeTab],
     keepPreviousData: true,
     queryFn: async () => {
-      const response = await fetch(articlesUrl);
+      const response = await fetch(articlesUrl, {
+        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
+      });
+
       if (!response.ok) {
         throw new Error("Failed to fetch articles");
       }
+
       return response.json();
     },
   });
@@ -51,17 +56,21 @@ export function ArticleList() {
           <div className="col-md-9">
             <div className="feed-toggle">
               <ul className="nav nav-pills outline-active">
-                {TABS.map(tab => (
-                  <li key={tab.value} className="nav-item">
-                    <NavLink
-                      to={{ pathname: "/", search: `?tab=${tab.value}` }}
-                      className="nav-link"
-                      isActive={() => activeTab === tab.value}
-                    >
-                      {tab.label}
-                    </NavLink>
-                  </li>
-                ))}
+                {TABS.map(tab => {
+                  const isDisabled = tab.value === "feed" && !currentUser;
+                  return (
+                    <li key={tab.value} className="nav-item">
+                      <NavLink
+                        to={{ pathname: "/", search: `?tab=${tab.value}` }}
+                        className={`nav-link ${isDisabled ? "disabled" : ""}`}
+                        isActive={() => activeTab === tab.value}
+                        onClick={event => isDisabled && event.preventDefault()}
+                      >
+                        {tab.label}
+                      </NavLink>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
