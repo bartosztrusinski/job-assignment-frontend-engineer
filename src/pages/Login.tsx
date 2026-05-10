@@ -14,7 +14,7 @@ type LoginResponse = {
   user: User;
 };
 
-export function LoginRegister() {
+export function Login() {
   const { currentUser, setCurrentUser } = useAuth();
   const history = useHistory();
   const mutation = useMutation<LoginResponse, Error, LoginUser>({
