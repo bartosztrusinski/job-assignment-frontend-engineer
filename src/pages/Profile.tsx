@@ -1,19 +1,17 @@
-import { Link, RouteComponentProps } from "react-router-dom";
-import { format } from "date-fns";
+import { RouteComponentProps } from "react-router-dom";
 
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
 import { useProfile } from "hooks/useProfile";
 import { useArticlesByAuthor } from "hooks/useArticlesByAuthor";
+import { ArticlePreviewCard } from "components/articles/ArticlePreviewCard";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
   const { currentUser } = useAuth();
   const { data: profileData, isLoading: isProfileLoading } = useProfile(username);
   const { data: articlesData, isLoading: isArticlesLoading } = useArticlesByAuthor(username);
-  const favoriteMutation = useFavoriteArticleMutation();
   const followMutation = useFollowUserMutation();
   const hasNoArticles = articlesData?.articles.length === 0;
 
@@ -74,38 +72,7 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
             {hasNoArticles ? (
               <div className="article-preview">No articles found.</div>
             ) : articlesData ? (
-              articlesData.articles.map(article => (
-                <div key={article.slug} className="article-preview">
-                  <div className="article-meta">
-                    <Link to={`/profile/${article.author.username}`}>
-                      <img src={article.author.image || userImagePlaceholder} alt={article.author.username} />
-                    </Link>
-                    <div className="info">
-                      <Link to={`/profile/${article.author.username}`} className="author">
-                        {article.author.username}
-                      </Link>
-                      <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
-                    </div>
-                    <button
-                      className={`btn btn-sm pull-xs-right ${
-                        article.favorited ? "btn-primary" : "btn-outline-primary"
-                      }`}
-                      onClick={() => favoriteMutation.mutate({ slug: article.slug, favorited: article.favorited })}
-                      disabled={
-                        !currentUser ||
-                        (favoriteMutation.isLoading && favoriteMutation.variables?.slug === article.slug)
-                      }
-                    >
-                      <i className="ion-heart" /> {article.favoritesCount}
-                    </button>
-                  </div>
-                  <Link to={`/${article.slug}`} className="preview-link">
-                    <h1>{article.title}</h1>
-                    <p>{article.description}</p>
-                    <span>Read more...</span>
-                  </Link>
-                </div>
-              ))
+              articlesData.articles.map(article => <ArticlePreviewCard key={article.slug} article={article} />)
             ) : isArticlesLoading ? (
               <div className="article-preview">Loading articles...</div>
             ) : (
