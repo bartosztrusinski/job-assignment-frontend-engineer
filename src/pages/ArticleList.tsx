@@ -1,20 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 
-import type { Article } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
-import { useApiFetch } from "hooks/useApiFetch";
+import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
+import { useArticles } from "hooks/useArticles";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
-const BASE_URL = "/articles";
-const DEFAULT_TAB = "global";
-const TABS = [
-  { label: "Your Feed", value: "feed" },
-  { label: "Global Feed", value: DEFAULT_TAB },
-] as const;
+const TABS = ["feed", "global"] as const;
 
 function useSearchParam(param: string) {
   const location = useLocation();
@@ -24,21 +17,9 @@ function useSearchParam(param: string) {
 
 export function ArticleList() {
   const { currentUser } = useAuth();
-  const apiFetch = useApiFetch();
   const tabParam = useSearchParam("tab");
-  const activeTab = TABS.find(tab => tabParam === tab.value)?.value ?? DEFAULT_TAB;
-  const articlesUrl = activeTab === "feed" ? `${BASE_URL}/feed` : BASE_URL;
-  const { data, isLoading, isFetching, isPreviousData } = useQuery<{ articles: Article[] }>({
-    queryKey: ["articles", activeTab],
-    keepPreviousData: true,
-    queryFn: async () => {
-      const response = await apiFetch(articlesUrl);
-      if (!response.ok) {
-        throw new Error("Failed to fetch articles");
-      }
-      return response.json();
-    },
-  });
+  const activeTab = TABS.find(tab => tabParam === tab) ?? "global";
+  const { data, isLoading, isFetching, isPreviousData } = useArticles(activeTab);
   const favoriteMutation = useFavoriteArticleMutation();
   const hasNoArticles = data?.articles.length === 0;
   const isSwitchingTab = isPreviousData && isFetching;
@@ -57,21 +38,25 @@ export function ArticleList() {
           <div className="col-md-9">
             <div className="feed-toggle">
               <ul className="nav nav-pills outline-active">
-                {TABS.map(tab => {
-                  const isDisabled = tab.value === "feed" && !currentUser;
-                  return (
-                    <li key={tab.value} className="nav-item">
-                      <NavLink
-                        to={{ pathname: "/", search: `?tab=${tab.value}` }}
-                        className={`nav-link ${isDisabled ? "disabled" : ""}`}
-                        isActive={() => activeTab === tab.value}
-                        onClick={event => isDisabled && event.preventDefault()}
-                      >
-                        {tab.label}
-                      </NavLink>
-                    </li>
-                  );
-                })}
+                <li className="nav-item">
+                  <NavLink
+                    to={{ pathname: "/", search: "?tab=feed" }}
+                    className={`nav-link ${!currentUser ? "disabled" : ""}`}
+                    isActive={() => activeTab === "feed"}
+                    onClick={event => !currentUser && event.preventDefault()}
+                  >
+                    Your Feed
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink
+                    to={{ pathname: "/", search: "?tab=global" }}
+                    className="nav-link"
+                    isActive={() => activeTab === "global"}
+                  >
+                    Global Feed
+                  </NavLink>
+                </li>
               </ul>
             </div>
 

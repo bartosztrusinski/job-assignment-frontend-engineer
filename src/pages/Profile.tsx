@@ -1,42 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link, RouteComponentProps } from "react-router-dom";
-
-import type { Article, Profile as ProfileType } from "types";
-import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { format } from "date-fns";
+
+import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
 import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
-import { useApiFetch } from "hooks/useApiFetch";
+import { useProfile } from "hooks/useProfile";
+import { useArticlesByAuthor } from "hooks/useArticlesByAuthor";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
   const { currentUser } = useAuth();
-  const apiFetch = useApiFetch();
-  const { data: profileData, isLoading: isProfileLoading } = useQuery<{ profile: ProfileType }>({
-    queryKey: ["profile", username],
-    queryFn: async () => {
-      const response = await apiFetch(`/profiles/${username}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch profile");
-      }
-      return response.json();
-    },
-  });
-  const { data: articlesData, isLoading: isArticlesLoading } = useQuery<{ articles: Article[] }>({
-    queryKey: ["articles", username],
-    keepPreviousData: true,
-    queryFn: async () => {
-      const response = await apiFetch(`/articles?author=${username}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch articles");
-      }
-      return response.json();
-    },
-  });
+  const { data: profileData, isLoading: isProfileLoading } = useProfile(username);
+  const { data: articlesData, isLoading: isArticlesLoading } = useArticlesByAuthor(username);
   const favoriteMutation = useFavoriteArticleMutation();
   const followMutation = useFollowUserMutation();
-
   const hasNoArticles = articlesData?.articles.length === 0;
 
   return (

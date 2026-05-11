@@ -1,29 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { format } from "date-fns";
 import Markdown from "react-markdown";
 
-import type { Article as ArticleType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
 import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
-import { useApiFetch } from "hooks/useApiFetch";
+import { useArticle } from "hooks/useArticle";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
   const { currentUser } = useAuth();
-  const apiFetch = useApiFetch();
-  const { data, isLoading, isError } = useQuery<{ article: ArticleType }>({
-    queryKey: ["article", slug],
-    queryFn: async () => {
-      const response = await apiFetch(`/articles/${slug}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch article");
-      }
-      return response.json();
-    },
-  });
+  const { data, isLoading, isError } = useArticle(slug);
   const favoriteMutation = useFavoriteArticleMutation();
   const followMutation = useFollowUserMutation();
 
