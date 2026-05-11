@@ -1,5 +1,6 @@
 import { useAuth } from "contexts/AuthContext";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
+import { Link } from "react-router-dom";
 
 export function Navbar() {
   const { currentUser } = useAuth();
@@ -7,54 +8,54 @@ export function Navbar() {
   return (
     <nav className="navbar navbar-light">
       <div className="container">
-        <a className="navbar-brand" href="/#">
+        <Link className="navbar-brand" to="/">
           conduit
-        </a>
+        </Link>
         <ul className="nav navbar-nav pull-xs-right">
           <li className="nav-item">
             {/* Add "active" class when you're on that page" */}
-            <a className="nav-link active" href="/#">
+            <Link className="nav-link active" to="/">
               Home
-            </a>
+            </Link>
           </li>
 
           {currentUser ? (
             <>
               <li className="nav-item">
-                <a className="nav-link" href="/#/editor">
+                <Link className="nav-link" to="/editor">
                   <i className="ion-compose" />
                   &nbsp;New Article
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/#/settings">
+                <Link className="nav-link" to="/settings">
                   <i className="ion-gear-a" />
                   &nbsp;Settings
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href={`/#/profile/${currentUser.username}`}>
+                <Link className="nav-link" to={`/profile/${currentUser.username}`}>
                   <img src={currentUser.image || userImagePlaceholder} className="user-pic" alt="" />
                   {currentUser.username}
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/#/logout">
+                <Link className="nav-link" to="/logout">
                   Logout
-                </a>
+                </Link>
               </li>
             </>
           ) : (
             <>
               <li className="nav-item">
-                <a className="nav-link" href="/#/login">
+                <Link className="nav-link" to="/login">
                   Sign in
-                </a>
+                </Link>
               </li>
               <li className="nav-item">
-                <a className="nav-link" href="/#/register">
+                <Link className="nav-link" to="/register">
                   Sign up
-                </a>
+                </Link>
               </li>
             </>
           )}
