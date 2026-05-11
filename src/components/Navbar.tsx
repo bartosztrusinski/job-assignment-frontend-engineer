@@ -1,6 +1,6 @@
 import { useAuth } from "contexts/AuthContext";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export function Navbar() {
   const { currentUser } = useAuth();
@@ -13,49 +13,48 @@ export function Navbar() {
         </Link>
         <ul className="nav navbar-nav pull-xs-right">
           <li className="nav-item">
-            {/* Add "active" class when you're on that page" */}
-            <Link className="nav-link active" to="/">
+            <NavLink className="nav-link" to="/" exact>
               Home
-            </Link>
+            </NavLink>
           </li>
 
           {currentUser ? (
             <>
               <li className="nav-item">
-                <Link className="nav-link" to="/editor">
+                <NavLink className="nav-link" to="/editor">
                   <i className="ion-compose" />
                   &nbsp;New Article
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/settings">
+                <NavLink className="nav-link" to="/settings">
                   <i className="ion-gear-a" />
                   &nbsp;Settings
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to={`/profile/${currentUser.username}`}>
+                <NavLink className="nav-link" to={`/profile/${currentUser.username}`}>
                   <img src={currentUser.image || userImagePlaceholder} className="user-pic" alt="" />
                   {currentUser.username}
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/logout">
+                <NavLink className="nav-link" to="/logout">
                   Logout
-                </Link>
+                </NavLink>
               </li>
             </>
           ) : (
             <>
               <li className="nav-item">
-                <Link className="nav-link" to="/login">
+                <NavLink className="nav-link" to="/login">
                   Sign in
-                </Link>
+                </NavLink>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="/register">
+                <NavLink className="nav-link" to="/register">
                   Sign up
-                </Link>
+                </NavLink>
               </li>
             </>
           )}
