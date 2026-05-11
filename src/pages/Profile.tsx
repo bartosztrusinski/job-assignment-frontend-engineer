@@ -4,9 +4,12 @@ import { Link, RouteComponentProps } from "react-router-dom";
 import type { Article, Profile as ProfileType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { format } from "date-fns";
+import { useAuth } from "contexts/AuthContext";
+import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
+  const { currentUser } = useAuth();
   const { data: profileData, isLoading: isProfileLoading } = useQuery<{ profile: ProfileType }>({
     queryKey: ["profile", username],
     queryFn: async () => {
@@ -21,13 +24,16 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
     queryKey: ["articles", username],
     keepPreviousData: true,
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles?author=${username}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles?author=${username}`, {
+        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch articles");
       }
       return response.json();
     },
   });
+  const favoriteMutation = useFavoriteArticleMutation();
 
   const hasNoArticles = articlesData?.articles.length === 0;
 
@@ -90,7 +96,16 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
                       </Link>
                       <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
                     </div>
-                    <button className="btn btn-outline-primary btn-sm pull-xs-right">
+                    <button
+                      className={`btn btn-sm pull-xs-right ${
+                        article.favorited ? "btn-primary" : "btn-outline-primary"
+                      }`}
+                      onClick={() => favoriteMutation.mutate({ slug: article.slug, favorited: article.favorited })}
+                      disabled={
+                        !currentUser ||
+                        (favoriteMutation.isLoading && favoriteMutation.variables?.slug === article.slug)
+                      }
+                    >
                       <i className="ion-heart" /> {article.favoritesCount}
                     </button>
                   </div>
