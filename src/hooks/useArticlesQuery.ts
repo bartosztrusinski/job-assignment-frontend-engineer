@@ -4,7 +4,7 @@ import { useApiFetch } from "hooks/useApiFetch";
 
 type ArticlesResponse = { articles: Article[] };
 
-export function useArticles(tab: "feed" | "global") {
+export function useArticlesQuery(tab: "feed" | "global") {
   const apiFetch = useApiFetch();
 
   return useQuery<ArticlesResponse>({

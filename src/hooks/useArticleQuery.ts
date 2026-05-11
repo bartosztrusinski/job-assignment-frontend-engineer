@@ -4,7 +4,7 @@ import { useApiFetch } from "hooks/useApiFetch";
 
 type SingleArticleResponse = { article: Article };
 
-export function useArticle(slug: string) {
+export function useArticleQuery(slug: string) {
   const apiFetch = useApiFetch();
 
   return useQuery<SingleArticleResponse>({

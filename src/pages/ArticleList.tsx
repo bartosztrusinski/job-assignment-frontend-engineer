@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 
 import { useAuth } from "contexts/AuthContext";
-import { useArticles } from "hooks/useArticles";
+import { useArticlesQuery } from "hooks/useArticlesQuery";
 import { ArticlePreviewCard } from "components/articles/ArticlePreviewCard";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
@@ -17,7 +17,7 @@ export function ArticleList() {
   const { currentUser } = useAuth();
   const tabParam = useSearchParam("tab");
   const activeTab = TABS.find(tab => tabParam === tab) ?? "global";
-  const { data, isLoading, isFetching, isPreviousData } = useArticles(activeTab);
+  const { data, isLoading, isFetching, isPreviousData } = useArticlesQuery(activeTab);
   const hasNoArticles = data?.articles.length === 0;
   const isSwitchingTab = isPreviousData && isFetching;
 

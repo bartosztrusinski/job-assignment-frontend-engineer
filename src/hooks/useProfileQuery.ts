@@ -4,7 +4,7 @@ import { useApiFetch } from "hooks/useApiFetch";
 
 type ProfileResponse = { profile: Profile };
 
-export function useProfile(username: string) {
+export function useProfileQuery(username: string) {
   const apiFetch = useApiFetch();
 
   return useQuery<ProfileResponse>({

@@ -3,15 +3,15 @@ import { RouteComponentProps } from "react-router-dom";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
-import { useProfile } from "hooks/useProfile";
-import { useArticlesByAuthor } from "hooks/useArticlesByAuthor";
+import { useProfileQuery } from "hooks/useProfileQuery";
+import { useArticlesByAuthorQuery } from "hooks/useArticlesByAuthorQuery";
 import { ArticlePreviewCard } from "components/articles/ArticlePreviewCard";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
   const { currentUser } = useAuth();
-  const { data: profileData, isLoading: isProfileLoading } = useProfile(username);
-  const { data: articlesData, isLoading: isArticlesLoading } = useArticlesByAuthor(username);
+  const { data: profileData, isLoading: isProfileLoading } = useProfileQuery(username);
+  const { data: articlesData, isLoading: isArticlesLoading } = useArticlesByAuthorQuery(username);
   const followMutation = useFollowUserMutation();
   const hasNoArticles = articlesData?.articles.length === 0;
 

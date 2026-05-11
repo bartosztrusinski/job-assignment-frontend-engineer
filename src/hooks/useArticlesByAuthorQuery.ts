@@ -4,7 +4,7 @@ import { useApiFetch } from "hooks/useApiFetch";
 
 type ArticlesResponse = { articles: Article[] };
 
-export function useArticlesByAuthor(username: string) {
+export function useArticlesByAuthorQuery(username: string) {
   const apiFetch = useApiFetch();
 
   return useQuery<ArticlesResponse>({

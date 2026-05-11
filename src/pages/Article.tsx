@@ -1,12 +1,12 @@
 import type { RouteComponentProps } from "react-router-dom";
 import Markdown from "react-markdown";
 
-import { useArticle } from "hooks/useArticle";
+import { useArticleQuery } from "hooks/useArticleQuery";
 import { ArticleMeta } from "components/articles/ArticleMeta";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
-  const { data, isLoading, isError } = useArticle(slug);
+  const { data, isLoading, isError } = useArticleQuery(slug);
 
   if (isLoading) {
     return (
