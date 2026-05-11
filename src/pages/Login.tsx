@@ -1,41 +1,12 @@
-import { useMutation } from "@tanstack/react-query";
-import { Redirect, useHistory } from "react-router-dom";
-import type { User } from "types";
+import { FormEvent } from "react";
+import { Redirect } from "react-router-dom";
 
 import { useAuth } from "contexts/AuthContext";
-import { FormEvent } from "react";
-
-type LoginUser = {
-  email: string;
-  password: string;
-};
-
-type LoginResponse = {
-  user: User;
-};
+import { useLoginMutation } from "hooks/useLoginMutation";
 
 export function Login() {
-  const { currentUser, setCurrentUser } = useAuth();
-  const history = useHistory();
-  const mutation = useMutation<LoginResponse, Error, LoginUser>({
-    mutationFn: async user => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user }),
-      });
-
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      return response.json();
-    },
-    onSuccess: ({ user }) => {
-      setCurrentUser(user);
-      history.push("/");
-    },
-  });
+  const { currentUser } = useAuth();
+  const loginMutation = useLoginMutation();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,7 +15,7 @@ export function Login() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    mutation.mutate({ email, password });
+    loginMutation.mutate({ email, password });
   }
 
   if (currentUser) {
@@ -58,10 +29,12 @@ export function Login() {
           <div className="col-md-6 offset-md-3 col-xs-12">
             <h1 className="text-xs-center">Sign in</h1>
 
-            {mutation.isError && (
+            {loginMutation.isError && (
               <ul className="error-messages">
                 <li>
-                  {mutation.error instanceof Error ? mutation.error.message : "Something went wrong. Please try again."}
+                  {loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : "Something went wrong. Please try again."}
                 </li>
               </ul>
             )}
@@ -85,7 +58,7 @@ export function Login() {
                   required
                 />
               </fieldset>
-              <button type="submit" className="btn btn-lg btn-primary pull-xs-right" disabled={mutation.isLoading}>
+              <button type="submit" className="btn btn-lg btn-primary pull-xs-right" disabled={loginMutation.isLoading}>
                 Sign in
               </button>
             </form>
