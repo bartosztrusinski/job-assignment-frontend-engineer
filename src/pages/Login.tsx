@@ -2,7 +2,7 @@ import { FormEvent } from "react";
 import { Redirect } from "react-router-dom";
 
 import { useAuth } from "contexts/AuthContext";
-import { useLoginMutation } from "hooks/useLoginMutation";
+import { useLoginMutation } from "hooks/mutations/useLoginMutation";
 
 export function Login() {
   const { currentUser } = useAuth();

@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 
 import { useAuth } from "contexts/AuthContext";
-import { useArticlesQuery } from "hooks/useArticlesQuery";
+import { useArticlesQuery } from "hooks/queries/useArticlesQuery";
 import { ArticlePreviewCard } from "components/articles/ArticlePreviewCard";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
@@ -62,10 +62,7 @@ export function ArticleList() {
             ) : data ? (
               <div style={{ opacity: isSwitchingTab ? 0.7 : 1, pointerEvents: isSwitchingTab ? "none" : "auto" }}>
                 {data.articles.map(article => (
-                  <ArticlePreviewCard
-                    key={article.slug}
-                    article={article}
-                  />
+                  <ArticlePreviewCard key={article.slug} article={article} />
                 ))}
               </div>
             ) : isLoading ? (

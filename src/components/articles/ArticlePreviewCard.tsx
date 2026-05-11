@@ -3,7 +3,7 @@ import { format } from "date-fns";
 
 import type { Article } from "types";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
+import { useFavoriteArticleMutation } from "hooks/mutations/useFavoriteArticleMutation";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 
 type Props = {

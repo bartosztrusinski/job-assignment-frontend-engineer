@@ -2,9 +2,9 @@ import { RouteComponentProps } from "react-router-dom";
 
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
-import { useFollowUserMutation } from "hooks/useFollowUserMutation";
-import { useProfileQuery } from "hooks/useProfileQuery";
-import { useArticlesByAuthorQuery } from "hooks/useArticlesByAuthorQuery";
+import { useFollowUserMutation } from "hooks/mutations/useFollowUserMutation";
+import { useProfileQuery } from "hooks/queries/useProfileQuery";
+import { useArticlesByAuthorQuery } from "hooks/queries/useArticlesByAuthorQuery";
 import { ArticlePreviewCard } from "components/articles/ArticlePreviewCard";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {

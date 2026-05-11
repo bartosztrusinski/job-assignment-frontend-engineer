@@ -1,7 +1,7 @@
 import type { RouteComponentProps } from "react-router-dom";
 import Markdown from "react-markdown";
 
-import { useArticleQuery } from "hooks/useArticleQuery";
+import { useArticleQuery } from "hooks/queries/useArticleQuery";
 import { ArticleMeta } from "components/articles/ArticleMeta";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {

@@ -3,8 +3,8 @@ import { format } from "date-fns";
 
 import type { Article } from "types";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
-import { useFollowUserMutation } from "hooks/useFollowUserMutation";
+import { useFavoriteArticleMutation } from "hooks/mutations/useFavoriteArticleMutation";
+import { useFollowUserMutation } from "hooks/mutations/useFollowUserMutation";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 
 type Props = {
