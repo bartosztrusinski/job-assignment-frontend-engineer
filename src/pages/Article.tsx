@@ -8,16 +8,16 @@ import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
 import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
+import { useApiFetch } from "hooks/useApiFetch";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
   const { currentUser } = useAuth();
+  const apiFetch = useApiFetch();
   const { data, isLoading, isError } = useQuery<{ article: ArticleType }>({
     queryKey: ["article", slug],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles/${slug}`, {
-        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
-      });
+      const response = await apiFetch(`/articles/${slug}`);
       if (!response.ok) {
         throw new Error("Failed to fetch article");
       }

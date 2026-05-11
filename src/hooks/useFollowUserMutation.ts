@@ -3,6 +3,7 @@ import type { QueryKey } from "@tanstack/react-query";
 
 import { useAuth } from "contexts/AuthContext";
 import type { Article, Profile } from "types";
+import { useApiFetch } from "hooks/useApiFetch";
 
 type ProfileResponse = { profile: Profile };
 type ArticleResponse = { article: Article };
@@ -28,6 +29,7 @@ function updateArticleAuthorFollowing(article: Article, username: string, follow
 export function useFollowUserMutation() {
   const queryClient = useQueryClient();
   const { currentUser } = useAuth();
+  const apiFetch = useApiFetch();
 
   return useMutation<ProfileResponse, Error, FollowMutationVariables, FollowMutationContext>({
     mutationFn: async ({ username, following }): Promise<ProfileResponse> => {
@@ -39,10 +41,7 @@ export function useFollowUserMutation() {
         throw new Error("You cannot follow yourself.");
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}/follow`, {
-        method: following ? "DELETE" : "POST",
-        headers: { Authorization: `Token ${currentUser.token}` },
-      });
+      const response = await apiFetch(`/profiles/${username}/follow`, { method: following ? "DELETE" : "POST" });
 
       if (!response.ok) {
         throw new Error(following ? "Failed to unfollow user." : "Failed to follow user.");

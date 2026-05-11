@@ -7,16 +7,16 @@ import { format } from "date-fns";
 import { useAuth } from "contexts/AuthContext";
 import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
 import { useFollowUserMutation } from "hooks/useFollowUserMutation";
+import { useApiFetch } from "hooks/useApiFetch";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
   const { currentUser } = useAuth();
+  const apiFetch = useApiFetch();
   const { data: profileData, isLoading: isProfileLoading } = useQuery<{ profile: ProfileType }>({
     queryKey: ["profile", username],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}`, {
-        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
-      });
+      const response = await apiFetch(`/profiles/${username}`);
       if (!response.ok) {
         throw new Error("Failed to fetch profile");
       }
@@ -27,9 +27,7 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
     queryKey: ["articles", username],
     keepPreviousData: true,
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles?author=${username}`, {
-        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
-      });
+      const response = await apiFetch(`/articles?author=${username}`);
       if (!response.ok) {
         throw new Error("Failed to fetch articles");
       }

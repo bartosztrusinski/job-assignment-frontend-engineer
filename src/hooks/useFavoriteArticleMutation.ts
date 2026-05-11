@@ -4,6 +4,8 @@ import type { QueryKey } from "@tanstack/react-query";
 import { useAuth } from "contexts/AuthContext";
 import type { Article } from "types";
 
+import { useApiFetch } from "hooks/useApiFetch";
+
 type ArticleResponse = { article: Article };
 type ArticleListResponse = { articles: Article[] };
 type FavoriteMutationVariables = {
@@ -29,6 +31,7 @@ function applyOptimisticFavorite(article: Article, favorited: boolean) {
 export function useFavoriteArticleMutation() {
   const queryClient = useQueryClient();
   const { currentUser } = useAuth();
+  const apiFetch = useApiFetch();
 
   return useMutation<ArticleResponse, Error, FavoriteMutationVariables, FavoriteMutationContext>({
     mutationFn: async ({ slug, favorited }): Promise<ArticleResponse> => {
@@ -36,10 +39,7 @@ export function useFavoriteArticleMutation() {
         throw new Error("You need to be logged in to favorite posts.");
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles/${slug}/favorite`, {
-        method: favorited ? "DELETE" : "POST",
-        headers: { Authorization: `Token ${currentUser.token}` },
-      });
+      const response = await apiFetch(`/articles/${slug}/favorite`, { method: favorited ? "DELETE" : "POST" });
 
       if (!response.ok) {
         throw new Error(favorited ? "Failed to remove post from favorites." : "Failed to add post to favorites.");

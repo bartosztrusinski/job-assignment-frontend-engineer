@@ -6,9 +6,10 @@ import type { Article } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
 import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
+import { useApiFetch } from "hooks/useApiFetch";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
-const BASE_URL = `${process.env.REACT_APP_API_URL}/api/articles`;
+const BASE_URL = "/articles";
 const DEFAULT_TAB = "global";
 const TABS = [
   { label: "Your Feed", value: "feed" },
@@ -23,6 +24,7 @@ function useSearchParam(param: string) {
 
 export function ArticleList() {
   const { currentUser } = useAuth();
+  const apiFetch = useApiFetch();
   const tabParam = useSearchParam("tab");
   const activeTab = TABS.find(tab => tabParam === tab.value)?.value ?? DEFAULT_TAB;
   const articlesUrl = activeTab === "feed" ? `${BASE_URL}/feed` : BASE_URL;
@@ -30,14 +32,10 @@ export function ArticleList() {
     queryKey: ["articles", activeTab],
     keepPreviousData: true,
     queryFn: async () => {
-      const response = await fetch(articlesUrl, {
-        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
-      });
-
+      const response = await apiFetch(articlesUrl);
       if (!response.ok) {
         throw new Error("Failed to fetch articles");
       }
-
       return response.json();
     },
   });
