@@ -38,7 +38,6 @@ export function ArticleMeta({ article }: Props) {
       >
         <i className={article.author.following ? "ion-minus-round" : "ion-plus-round"} />
         &nbsp; {article.author.following ? "Unfollow" : "Follow"} {article.author.username}{" "}
-        <span className="counter">(0)</span>
       </button>
       &nbsp;&nbsp;
       <button
