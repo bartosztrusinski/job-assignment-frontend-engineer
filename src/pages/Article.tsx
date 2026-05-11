@@ -6,7 +6,8 @@ import Markdown from "react-markdown";
 import type { Article as ArticleType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
+import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
+import { useFollowUserMutation } from "hooks/useFollowUserMutation";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
@@ -24,6 +25,7 @@ export function Article({ match }: RouteComponentProps<{ slug: string }>) {
     },
   });
   const favoriteMutation = useFavoriteArticleMutation();
+  const followMutation = useFollowUserMutation();
 
   if (isLoading) {
     return (
@@ -59,10 +61,19 @@ export function Article({ match }: RouteComponentProps<{ slug: string }>) {
               </Link>
               <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
             </div>
-            <button className="btn btn-sm btn-outline-secondary">
-              <i className="ion-plus-round" />
+            <button
+              className={`btn btn-sm ${article.author.following ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => followMutation.mutate(article.author)}
+              disabled={
+                !currentUser ||
+                currentUser.username === article.author.username ||
+                (followMutation.isLoading && followMutation.variables?.username === article.author.username)
+              }
+            >
+              <i className={article.author.following ? "ion-minus-round" : "ion-plus-round"} />
               {/* TODO display follower count */}
-              &nbsp; Follow {article.author.username} <span className="counter">(0)</span>
+              &nbsp; {article.author.following ? "Unfollow" : "Follow"} {article.author.username}{" "}
+              <span className="counter">(0)</span>
             </button>
             &nbsp;&nbsp;
             <button
@@ -98,9 +109,17 @@ export function Article({ match }: RouteComponentProps<{ slug: string }>) {
               </Link>
               <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
             </div>
-            <button className="btn btn-sm btn-outline-secondary">
-              <i className="ion-plus-round" />
-              &nbsp; Follow {article.author.username}
+            <button
+              className={`btn btn-sm ${article.author.following ? "btn-secondary" : "btn-outline-secondary"}`}
+              onClick={() => followMutation.mutate(article.author)}
+              disabled={
+                !currentUser ||
+                currentUser.username === article.author.username ||
+                (followMutation.isLoading && followMutation.variables?.username === article.author.username)
+              }
+            >
+              <i className={article.author.following ? "ion-minus-round" : "ion-plus-round"} />
+              &nbsp; {article.author.following ? "Unfollow" : "Follow"} {article.author.username}
             </button>
             &nbsp;
             <button

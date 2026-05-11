@@ -5,7 +5,8 @@ import type { Article, Profile as ProfileType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { format } from "date-fns";
 import { useAuth } from "contexts/AuthContext";
-import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
+import { useFavoriteArticleMutation } from "hooks/useFavoriteArticleMutation";
+import { useFollowUserMutation } from "hooks/useFollowUserMutation";
 
 export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { username } = match.params;
@@ -13,7 +14,9 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
   const { data: profileData, isLoading: isProfileLoading } = useQuery<{ profile: ProfileType }>({
     queryKey: ["profile", username],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/profiles/${username}`, {
+        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch profile");
       }
@@ -34,6 +37,7 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
     },
   });
   const favoriteMutation = useFavoriteArticleMutation();
+  const followMutation = useFollowUserMutation();
 
   const hasNoArticles = articlesData?.articles.length === 0;
 
@@ -48,9 +52,19 @@ export function Profile({ match }: RouteComponentProps<{ username: string }>) {
                   <img src={profileData.profile.image || userImagePlaceholder} className="user-img" />
                   <h4>{profileData.profile.username}</h4>
                   <p>{profileData.profile.bio}</p>
-                  <button className="btn btn-sm btn-outline-secondary action-btn">
-                    <i className="ion-plus-round" />
-                    &nbsp; Follow {profileData.profile.username}
+                  <button
+                    className={`btn btn-sm action-btn ${
+                      profileData.profile.following ? "btn-secondary" : "btn-outline-secondary"
+                    }`}
+                    onClick={() => followMutation.mutate(profileData.profile)}
+                    disabled={
+                      !currentUser ||
+                      currentUser.username === profileData.profile.username ||
+                      (followMutation.isLoading && followMutation.variables?.username === profileData.profile.username)
+                    }
+                  >
+                    <i className={profileData.profile.following ? "ion-minus-round" : "ion-plus-round"} />
+                    &nbsp; {profileData.profile.following ? "Unfollow" : "Follow"} {profileData.profile.username}
                   </button>
                 </>
               ) : isProfileLoading ? (
