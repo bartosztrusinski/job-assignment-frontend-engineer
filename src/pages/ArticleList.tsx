@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import type { Article } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
 import { useAuth } from "contexts/AuthContext";
+import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
 
 const POPULAR_TAGS = ["programming", "javascript", "emberjs", "angularjs", "react", "mean", "node", "rails"];
 const BASE_URL = `${process.env.REACT_APP_API_URL}/api/articles`;
@@ -40,6 +41,7 @@ export function ArticleList() {
       return response.json();
     },
   });
+  const favoriteMutation = useFavoriteArticleMutation();
   const hasNoArticles = data?.articles.length === 0;
 
   return (
@@ -89,7 +91,16 @@ export function ArticleList() {
                       </Link>
                       <span className="date">{format(new Date(article.createdAt), "MMMM do")}</span>
                     </div>
-                    <button className="btn btn-outline-primary btn-sm pull-xs-right">
+                    <button
+                      className={`btn btn-sm pull-xs-right ${
+                        article.favorited ? "btn-primary" : "btn-outline-primary"
+                      }`}
+                      onClick={() => favoriteMutation.mutate({ slug: article.slug, favorited: article.favorited })}
+                      disabled={
+                        !currentUser ||
+                        (favoriteMutation.isLoading && favoriteMutation.variables?.slug === article.slug)
+                      }
+                    >
                       <i className="ion-heart" /> {article.favoritesCount}
                     </button>
                   </div>

@@ -5,19 +5,25 @@ import Markdown from "react-markdown";
 
 import type { Article as ArticleType } from "types";
 import userImagePlaceholder from "assets/user-image-placeholder.png";
+import { useAuth } from "contexts/AuthContext";
+import { useFavoriteArticleMutation } from "../hooks/useFavoriteArticleMutation";
 
 export function Article({ match }: RouteComponentProps<{ slug: string }>) {
   const { slug } = match.params;
+  const { currentUser } = useAuth();
   const { data, isLoading, isError } = useQuery<{ article: ArticleType }>({
     queryKey: ["article", slug],
     queryFn: async () => {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles/${slug}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/articles/${slug}`, {
+        headers: currentUser ? { Authorization: `Token ${currentUser.token}` } : undefined,
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch article");
       }
       return response.json();
     },
   });
+  const favoriteMutation = useFavoriteArticleMutation();
 
   if (isLoading) {
     return (
@@ -59,9 +65,14 @@ export function Article({ match }: RouteComponentProps<{ slug: string }>) {
               &nbsp; Follow {article.author.username} <span className="counter">(0)</span>
             </button>
             &nbsp;&nbsp;
-            <button className="btn btn-sm btn-outline-primary">
+            <button
+              className={`btn btn-sm ${article.favorited ? "btn-primary" : "btn-outline-primary"}`}
+              onClick={() => favoriteMutation.mutate({ slug, favorited: article.favorited })}
+              disabled={favoriteMutation.isLoading}
+            >
               <i className="ion-heart" />
-              &nbsp; Favorite Post <span className="counter">({article.favoritesCount})</span>
+              &nbsp; {article.favorited ? "Unfavorite Post" : "Favorite Post"}{" "}
+              <span className="counter">({article.favoritesCount})</span>
             </button>
           </div>
         </div>
@@ -92,9 +103,14 @@ export function Article({ match }: RouteComponentProps<{ slug: string }>) {
               &nbsp; Follow {article.author.username}
             </button>
             &nbsp;
-            <button className="btn btn-sm btn-outline-primary">
+            <button
+              className={`btn btn-sm ${article.favorited ? "btn-primary" : "btn-outline-primary"}`}
+              onClick={() => favoriteMutation.mutate({ slug, favorited: article.favorited })}
+              disabled={favoriteMutation.isLoading}
+            >
               <i className="ion-heart" />
-              &nbsp; Favorite Post <span className="counter">({article.favoritesCount})</span>
+              &nbsp; {article.favorited ? "Unfavorite Post" : "Favorite Post"}{" "}
+              <span className="counter">({article.favoritesCount})</span>
             </button>
           </div>
         </div>
